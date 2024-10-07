@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:5000',
+  baseURL: 'https://lms-server-nrfz.onrender.com',
 });
 
 // Interceptor to attach token for authenticated requests
