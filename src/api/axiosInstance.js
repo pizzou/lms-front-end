@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-  baseURL: 'https://lms-va5im0pg.b4a.run/',
+  baseURL: 'https://lms-va5im0pg.b4a.run',
 });
 
 // Interceptor to attach token for authenticated requests
