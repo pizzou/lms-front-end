@@ -2,6 +2,7 @@ import axios from "axios";
 
 const axiosInstance = axios.create({
   baseURL: "https://lms-va5im0pg.b4a.run",
+  withCredentials: true,
 });
 
 axiosInstance.interceptors.request.use(
