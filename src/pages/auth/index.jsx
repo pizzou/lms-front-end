@@ -11,10 +11,9 @@ import { signInFormControls, signUpFormControls } from "@/config";
 import { AuthContext } from "@/context/auth-context";
 import { GraduationCap } from "lucide-react";
 import { useContext, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 function AuthPage() {
-  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("signin");
   const {
     signInFormData,
@@ -23,7 +22,7 @@ function AuthPage() {
     setSignUpFormData,
     handleRegisterUser,
     handleLoginUser,
-    auth,
+    error, // Get the error from context
   } = useContext(AuthContext);
 
   function handleTabChange(value) {
@@ -31,44 +30,11 @@ function AuthPage() {
   }
 
   function checkIfSignInFormIsValid() {
-    return (
-      signInFormData &&
-      signInFormData.userEmail !== "" &&
-      signInFormData.password !== ""
-    );
+    return signInFormData && signInFormData.userEmail !== "" && signInFormData.password !== "";
   }
 
   function checkIfSignUpFormIsValid() {
-    return (
-      signUpFormData &&
-      signUpFormData.userName !== "" &&
-      signUpFormData.userEmail !== "" &&
-      signUpFormData.password !== ""
-    );
-  }
-
-  // Handle login submission
-  async function handleLogin(event) {
-    event.preventDefault(); // Prevent the default form submission
-    await handleLoginUser(event); // Call the login service
-    if (auth.authenticate) {
-      navigate("/"); // Redirect after successful login
-    } else {
-      // Handle the error (optional)
-      console.error("Login failed");
-    }
-  }
-
-  // Handle registration submission
-  async function handleRegister(event) {
-    event.preventDefault(); // Prevent the default form submission
-    await handleRegisterUser(event); // Call the register service
-    if (auth.authenticate) {
-      navigate("/"); // Redirect after successful registration
-    } else {
-      // Handle the error (optional)
-      console.error("Registration failed");
-    }
+    return signUpFormData && signUpFormData.userName !== "" && signUpFormData.userEmail !== "" && signUpFormData.password !== "";
   }
 
   return (
@@ -80,12 +46,7 @@ function AuthPage() {
         </Link>
       </header>
       <div className="flex items-center justify-center min-h-screen bg-background">
-        <Tabs
-          value={activeTab}
-          defaultValue="signin"
-          onValueChange={handleTabChange}
-          className="w-full max-w-md"
-        >
+        <Tabs value={activeTab} defaultValue="signin" onValueChange={handleTabChange} className="w-full max-w-md">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="signin">Sign In</TabsTrigger>
             <TabsTrigger value="signup">Sign Up</TabsTrigger>
@@ -94,18 +55,17 @@ function AuthPage() {
             <Card className="p-6 space-y-4">
               <CardHeader>
                 <CardTitle>Sign in to your account</CardTitle>
-                <CardDescription>
-                  Enter your email and password to access your account
-                </CardDescription>
+                <CardDescription>Enter your email and password to access your account</CardDescription>
               </CardHeader>
               <CardContent className="space-y-2">
+                {error && <div className="text-red-600">{error}</div>} {/* Display error message */}
                 <CommonForm
                   formControls={signInFormControls}
                   buttonText={"Sign In"}
                   formData={signInFormData}
                   setFormData={setSignInFormData}
                   isButtonDisabled={!checkIfSignInFormIsValid()}
-                  handleSubmit={handleLogin} // Use the custom handleLogin
+                  handleSubmit={handleLoginUser}
                 />
               </CardContent>
             </Card>
@@ -114,18 +74,17 @@ function AuthPage() {
             <Card className="p-6 space-y-4">
               <CardHeader>
                 <CardTitle>Create a new account</CardTitle>
-                <CardDescription>
-                  Enter your details to get started
-                </CardDescription>
+                <CardDescription>Enter your details to get started</CardDescription>
               </CardHeader>
               <CardContent className="space-y-2">
+                {error && <div className="text-red-600">{error}</div>} {/* Display error message */}
                 <CommonForm
                   formControls={signUpFormControls}
                   buttonText={"Sign Up"}
                   formData={signUpFormData}
                   setFormData={setSignUpFormData}
                   isButtonDisabled={!checkIfSignUpFormIsValid()}
-                  handleSubmit={handleRegister} // Use the custom handleRegister
+                  handleSubmit={handleRegisterUser}
                 />
               </CardContent>
             </Card>

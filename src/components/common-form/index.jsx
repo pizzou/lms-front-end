@@ -9,9 +9,15 @@ function CommonForm({
   setFormData,
   isButtonDisabled = false,
 }) {
+  // This function will handle the form submission and prevent the default behavior
+  const onSubmit = (e) => {
+    e.preventDefault();
+    handleSubmit(e);
+  };
+
   return (
-    <form onSubmit={handleSubmit}>
-      {/* render form controls here */}
+    <form onSubmit={onSubmit}>
+      {/* Render form controls here */}
       <FormControls
         formControls={formControls}
         formData={formData}
