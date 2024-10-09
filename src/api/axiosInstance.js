@@ -1,8 +1,7 @@
 import axios from "axios";
 
 const axiosInstance = axios.create({
-  baseURL: "https://lms-va5im0pg.b4a.run",
-  withCredentials: true,
+  baseURL: "https://lms-va5im0pg.b4a.run/",
 });
 
 axiosInstance.interceptors.request.use(
@@ -15,24 +14,7 @@ axiosInstance.interceptors.request.use(
 
     return config;
   },
-  (err) => {
-    console.error("Request error:", err);
-    return Promise.reject(err);
-  }
+  (err) => Promise.reject(err)
 );
 
-axiosInstance.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    // Log response error for better understanding
-    if (error.response) {
-      console.error("Response error:", error.response);
-    } else if (error.request) {
-      console.error("Request error, no response received:", error.request);
-    } else {
-      console.error("Error during setup:", error.message);
-    }
-
-    return Promise.reject(error);
-  }
-);
+export default axiosInstance;
