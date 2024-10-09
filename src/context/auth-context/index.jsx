@@ -14,21 +14,28 @@ export default function AuthProvider({ children }) {
 
   async function handleRegisterUser(event) {
     event.preventDefault();
-    
+  
     try {
       const data = await registerService(signUpFormData);
       console.log(data, "Registration response");
   
-      if (data.success && data.data?.accessToken) {
-        // If registration is successful and accessToken is returned
-        sessionStorage.setItem("accessToken", JSON.stringify(data.data.accessToken));
-        setAuth({
-          authenticate: true,
-          user: data.data.user,
-        });
+      if (data.success) {
+        if (data.data?.accessToken) {
+          // Automatically log the user in if an accessToken is provided
+          sessionStorage.setItem("accessToken", JSON.stringify(data.data.accessToken));
+          setAuth({
+            authenticate: true,
+            user: data.data.user,
+          });
+        } else {
+          // No accessToken provided, prompt the user to log in manually
+          console.log("Registration successful, but no accessToken provided.");
+          alert("Registration successful! Please log in to continue.");
+          // Redirect to login or change the active tab to 'signin'
+          setActiveTab('signin');
+        }
       } else {
-        // Handle cases where accessToken is not returned (maybe user needs to log in after registration)
-        console.log("Registration successful, but no accessToken provided.");
+        console.error("Registration failed.");
         setAuth({
           authenticate: false,
           user: null,
@@ -42,6 +49,7 @@ export default function AuthProvider({ children }) {
       });
     }
   }
+  
   
 
   async function handleLoginUser(event) {
