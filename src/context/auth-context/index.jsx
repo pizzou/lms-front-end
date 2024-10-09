@@ -14,20 +14,35 @@ export default function AuthProvider({ children }) {
 
   async function handleRegisterUser(event) {
     event.preventDefault();
+    
     try {
       const data = await registerService(signUpFormData);
-      if (data.success) {
+      console.log(data, "Registration response");
+  
+      if (data.success && data.data?.accessToken) {
+        // If registration is successful and accessToken is returned
         sessionStorage.setItem("accessToken", JSON.stringify(data.data.accessToken));
-        setAuth({ authenticate: true, user: data.data.user });
-        setError(null); // Clear any previous errors
+        setAuth({
+          authenticate: true,
+          user: data.data.user,
+        });
       } else {
-        setError("Registration failed. Please try again."); // Set error message
+        // Handle cases where accessToken is not returned (maybe user needs to log in after registration)
+        console.log("Registration successful, but no accessToken provided.");
+        setAuth({
+          authenticate: false,
+          user: null,
+        });
       }
     } catch (error) {
-      console.error("Registration error:", error);
-      setError("Registration failed. Please try again.");
+      console.log("Registration error:", error);
+      setAuth({
+        authenticate: false,
+        user: null,
+      });
     }
   }
+  
 
   async function handleLoginUser(event) {
     event.preventDefault();
