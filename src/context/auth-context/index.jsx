@@ -13,69 +13,37 @@ export default function AuthProvider({ children }) {
     user: null,
   });
   const [loading, setLoading] = useState(true);
-  const [formLoading, setFormLoading] = useState(false); // For form submission loading
 
-  // Handle user registration
   async function handleRegisterUser(event) {
     event.preventDefault();
-    setFormLoading(true); // Show form loading state
-
-    try {
-      const data = await registerService(signUpFormData);
-      if (data.success) {
-        sessionStorage.setItem(
-          "accessToken",
-          JSON.stringify(data.data.accessToken)
-        );
-        setAuth({
-          authenticate: true,
-          user: data.data.user,
-        });
-      }
-    } catch (error) {
-      console.error("Registration error:", error);
-    } finally {
-      setFormLoading(false); // Stop form loading state
-    }
+    const data = await registerService(signUpFormData);
   }
 
-  // Handle user login
   async function handleLoginUser(event) {
     event.preventDefault();
-    setFormLoading(true); // Show form loading state
+    const data = await loginService(signInFormData);
+    console.log(data, "datadatadatadatadata");
 
-    try {
-      const data = await loginService(signInFormData);
-      if (data.success) {
-        sessionStorage.setItem(
-          "accessToken",
-          JSON.stringify(data.data.accessToken)
-        );
-        setAuth({
-          authenticate: true,
-          user: data.data.user,
-        });
-      } else {
-        setAuth({
-          authenticate: false,
-          user: null,
-        });
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-    } finally {
-      setFormLoading(false); // Stop form loading state
+    if (data.success) {
+      sessionStorage.setItem(
+        "accessToken",
+        JSON.stringify(data.data.accessToken)
+      );
+      setAuth({
+        authenticate: true,
+        user: data.data.user,
+      });
+    } else {
+      setAuth({
+        authenticate: false,
+        user: null,
+      });
     }
   }
 
-  // Check if user is authenticated
-  async function checkAuthUser() {
-    const token = sessionStorage.getItem('accessToken');
-    if (!token) {
-      setLoading(false); // Skip checking auth if no token is present
-      return;
-    }
+  //check auth user
 
+  async function checkAuthUser() {
     try {
       const data = await checkAuthService();
       if (data.success) {
@@ -83,38 +51,38 @@ export default function AuthProvider({ children }) {
           authenticate: true,
           user: data.data.user,
         });
+        setLoading(false);
       } else {
         setAuth({
           authenticate: false,
           user: null,
         });
+        setLoading(false);
       }
     } catch (error) {
-      console.error("Check auth error:", error);
-      setAuth({
-        authenticate: false,
-        user: null,
-      });
-    } finally {
-      setLoading(false); // Stop the loading state
+      console.log(error);
+      if (!error?.response?.data?.success) {
+        setAuth({
+          authenticate: false,
+          user: null,
+        });
+        setLoading(false);
+      }
     }
   }
 
-  // Reset authentication state
   function resetCredentials() {
     setAuth({
       authenticate: false,
       user: null,
     });
-    sessionStorage.removeItem("accessToken"); // Optionally clear the token
   }
 
-  // Call checkAuthUser on component mount
   useEffect(() => {
     checkAuthUser();
   }, []);
 
-  console.log(auth, "Auth Status");
+  console.log(auth, "gf");
 
   return (
     <AuthContext.Provider
@@ -127,7 +95,6 @@ export default function AuthProvider({ children }) {
         handleLoginUser,
         auth,
         resetCredentials,
-        formLoading, // Expose form loading to children components
       }}
     >
       {loading ? <Skeleton /> : children}
