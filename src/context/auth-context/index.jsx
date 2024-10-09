@@ -2,6 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { initialSignInFormData, initialSignUpFormData } from "@/config";
 import { checkAuthService, loginService, registerService } from "@/services";
 import { createContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 
 export const AuthContext = createContext(null);
 
@@ -14,10 +15,22 @@ export default function AuthProvider({ children }) {
   });
   const [loading, setLoading] = useState(true);
 
-  async function handleRegisterUser(event) {
+  const navigate = useNavigate(); // Initialize useNavigate hook
+
+ 
+
+async function handleRegisterUser(event) {
     event.preventDefault();
     const data = await registerService(signUpFormData);
-  }
+
+    if (data.success) {
+      // After successful registration, redirect to login
+      navigate("/auth"); // Redirect to the /auth route where AuthPage is located
+    } else {
+      console.error("Registration failed", data.message);
+    }
+}
+
 
   async function handleLoginUser(event) {
     event.preventDefault();
@@ -41,8 +54,7 @@ export default function AuthProvider({ children }) {
     }
   }
 
-  //check auth user
-
+  // Check auth user
   async function checkAuthUser() {
     try {
       const data = await checkAuthService();
