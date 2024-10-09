@@ -11,9 +11,10 @@ import { signInFormControls, signUpFormControls } from "@/config";
 import { AuthContext } from "@/context/auth-context";
 import { GraduationCap } from "lucide-react";
 import { useContext, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function AuthPage() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("signin");
   const {
     signInFormData,
@@ -22,6 +23,7 @@ function AuthPage() {
     setSignUpFormData,
     handleRegisterUser,
     handleLoginUser,
+    auth,
   } = useContext(AuthContext);
 
   function handleTabChange(value) {
@@ -45,7 +47,29 @@ function AuthPage() {
     );
   }
 
-  console.log(signInFormData);
+  // Handle login submission
+  async function handleLogin(event) {
+    event.preventDefault(); // Prevent the default form submission
+    await handleLoginUser(event); // Call the login service
+    if (auth.authenticate) {
+      navigate("/"); // Redirect after successful login
+    } else {
+      // Handle the error (optional)
+      console.error("Login failed");
+    }
+  }
+
+  // Handle registration submission
+  async function handleRegister(event) {
+    event.preventDefault(); // Prevent the default form submission
+    await handleRegisterUser(event); // Call the register service
+    if (auth.authenticate) {
+      navigate("/"); // Redirect after successful registration
+    } else {
+      // Handle the error (optional)
+      console.error("Registration failed");
+    }
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -81,7 +105,7 @@ function AuthPage() {
                   formData={signInFormData}
                   setFormData={setSignInFormData}
                   isButtonDisabled={!checkIfSignInFormIsValid()}
-                  handleSubmit={handleLoginUser}
+                  handleSubmit={handleLogin} // Use the custom handleLogin
                 />
               </CardContent>
             </Card>
@@ -101,7 +125,7 @@ function AuthPage() {
                   formData={signUpFormData}
                   setFormData={setSignUpFormData}
                   isButtonDisabled={!checkIfSignUpFormIsValid()}
-                  handleSubmit={handleRegisterUser}
+                  handleSubmit={handleRegister} // Use the custom handleRegister
                 />
               </CardContent>
             </Card>
