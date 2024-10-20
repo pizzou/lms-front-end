@@ -143,7 +143,7 @@ function StudentViewCourseDetailsPage() {
         <h1 className="text-3xl font-bold mb-4">
           {studentViewCourseDetails?.title}
         </h1>
-        {/* <p className="text-xl mb-4">{studentViewCourseDetails?.subtitle}</p>
+        <p className="text-xl mb-4">{studentViewCourseDetails?.subtitle}</p>
         <div className="flex items-center space-x-4 mt-2 text-sm">
           <span>Created By {studentViewCourseDetails?.instructorName}</span>
           <span>Created On {studentViewCourseDetails?.date.split("T")[0]}</span>
@@ -157,7 +157,7 @@ function StudentViewCourseDetailsPage() {
               ? "Student"
               : "Students"}
           </span>
-        </div> */}
+        </div>
       </div>
       <div className="flex flex-col md:flex-row gap-8 mt-8">
         <main className="flex-grow">
