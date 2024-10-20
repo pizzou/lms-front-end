@@ -33,7 +33,8 @@ function StudentViewCourseDetailsPage() {
 
   const { auth } = useContext(AuthContext);
 
-  const [displayCurrentVideoFreePreview, setDisplayCurrentVideoFreePreview] = useState(null);
+  const [displayCurrentVideoFreePreview, setDisplayCurrentVideoFreePreview] =
+    useState(null);
   const [showFreePreviewDialog, setShowFreePreviewDialog] = useState(false);
   const [approvalUrl, setApprovalUrl] = useState("");
   const navigate = useNavigate();
@@ -41,35 +42,29 @@ function StudentViewCourseDetailsPage() {
   const location = useLocation();
 
   async function fetchStudentViewCourseDetails() {
-    try {
-      setLoadingState(true);
+    // const checkCoursePurchaseInfoResponse =
+    //   await checkCoursePurchaseInfoService(
+    //     currentCourseDetailsId,
+    //     auth?.user._id
+    //   );
 
-      // Check if the student has purchased the course
-      const checkCoursePurchaseInfoResponse = await checkCoursePurchaseInfoService(
-        currentCourseDetailsId,
-        auth?.user._id
-      );
+    // if (
+    //   checkCoursePurchaseInfoResponse?.success &&
+    //   checkCoursePurchaseInfoResponse?.data
+    // ) {
+    //   navigate(`/course-progress/${currentCourseDetailsId}`);
+    //   return;
+    // }
 
-      // Redirect if purchased
-      if (checkCoursePurchaseInfoResponse?.success && checkCoursePurchaseInfoResponse?.data) {
-        navigate(`/course-progress/${currentCourseDetailsId}`);
-        return;
-      }
+    const response = await fetchStudentViewCourseDetailsService(
+      currentCourseDetailsId
+    );
 
-      // Fetch the course details
-      const response = await fetchStudentViewCourseDetailsService(currentCourseDetailsId);
-      console.log("Course details response:", response); // Add logging
-
-      if (response?.success) {
-        setStudentViewCourseDetails(response?.data);
-      } else {
-        setStudentViewCourseDetails(null);
-      }
-
-    } catch (error) {
-      console.error("Error fetching course details:", error); // Error handling
+    if (response?.success) {
+      setStudentViewCourseDetails(response?.data);
+      setLoadingState(false);
+    } else {
       setStudentViewCourseDetails(null);
-    } finally {
       setLoadingState(false);
     }
   }
@@ -102,7 +97,10 @@ function StudentViewCourseDetailsPage() {
     const response = await createPaymentService(paymentPayload);
 
     if (response.success) {
-      sessionStorage.setItem("currentOrderId", JSON.stringify(response?.data?.orderId));
+      sessionStorage.setItem(
+        "currentOrderId",
+        JSON.stringify(response?.data?.orderId)
+      );
       setApprovalUrl(response?.data?.approveUrl);
     }
   }
@@ -112,10 +110,7 @@ function StudentViewCourseDetailsPage() {
   }, [displayCurrentVideoFreePreview]);
 
   useEffect(() => {
-    if (currentCourseDetailsId !== null) {
-      console.log("Fetching course details for:", currentCourseDetailsId); // Add logging
-      fetchStudentViewCourseDetails();
-    }
+    if (currentCourseDetailsId !== null) fetchStudentViewCourseDetails();
   }, [currentCourseDetailsId]);
 
   useEffect(() => {
@@ -123,10 +118,10 @@ function StudentViewCourseDetailsPage() {
   }, [id]);
 
   useEffect(() => {
-    if (!location.pathname.includes("course/details")) {
-      setStudentViewCourseDetails(null);
-      setCurrentCourseDetailsId(null);
-    }
+    if (!location.pathname.includes("course/details"))
+      setStudentViewCourseDetails(null),
+        setCurrentCourseDetailsId(null),
+        setCoursePurchaseId(null);
   }, [location.pathname]);
 
   if (loadingState) return <Skeleton />;
@@ -146,9 +141,9 @@ function StudentViewCourseDetailsPage() {
     <div className=" mx-auto p-4">
       <div className="bg-gray-900 text-white p-8 rounded-t-lg">
         <h1 className="text-3xl font-bold mb-4">
-          {studentViewCourseDetails?.title || "Loading..."}
+          {studentViewCourseDetails?.title}
         </h1>
-        <p className="text-xl mb-4">{studentViewCourseDetails?.subtitle || ""}</p>
+        {/* <p className="text-xl mb-4">{studentViewCourseDetails?.subtitle}</p>
         <div className="flex items-center space-x-4 mt-2 text-sm">
           <span>Created By {studentViewCourseDetails?.instructorName}</span>
           <span>Created On {studentViewCourseDetails?.date.split("T")[0]}</span>
@@ -162,7 +157,7 @@ function StudentViewCourseDetailsPage() {
               ? "Student"
               : "Students"}
           </span>
-        </div>
+        </div> */}
       </div>
       <div className="flex flex-col md:flex-row gap-8 mt-8">
         <main className="flex-grow">
@@ -173,13 +168,13 @@ function StudentViewCourseDetailsPage() {
             <CardContent>
               <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 {studentViewCourseDetails?.objectives
-                  ?.split(",")
+                  .split(",")
                   .map((objective, index) => (
                     <li key={index} className="flex items-start">
                       <CheckCircle className="mr-2 h-5 w-5 text-green-500 flex-shrink-0" />
                       <span>{objective}</span>
                     </li>
-                  )) || "No objectives available."}
+                  ))}
               </ul>
             </CardContent>
           </Card>
@@ -187,42 +182,35 @@ function StudentViewCourseDetailsPage() {
             <CardHeader>
               <CardTitle>Course Description</CardTitle>
             </CardHeader>
-            <CardContent>
-              {studentViewCourseDetails?.description || "No description available."}
-            </CardContent>
+            <CardContent>{studentViewCourseDetails?.description}</CardContent>
           </Card>
           <Card className="mb-8">
             <CardHeader>
               <CardTitle>Course Curriculum</CardTitle>
             </CardHeader>
             <CardContent>
-              {studentViewCourseDetails?.curriculum?.length > 0 ? (
-                studentViewCourseDetails?.curriculum?.map(
-                  (curriculumItem, index) => (
-                    <li
-                      key={index}
-                      className={`${
-                        curriculumItem?.freePreview
-                          ? "cursor-pointer"
-                          : "cursor-not-allowed"
-                      } flex items-center mb-4`}
-                      onClick={
-                        curriculumItem?.freePreview
-                          ? () => handleSetFreePreview(curriculumItem)
-                          : null
-                      }
-                    >
-                      {curriculumItem?.freePreview ? (
-                        <PlayCircle className="mr-2 h-4 w-4" />
-                      ) : (
-                        <Lock className="mr-2 h-4 w-4" />
-                      )}
-                      <span>{curriculumItem?.title}</span>
-                    </li>
-                  )
+              {studentViewCourseDetails?.curriculum?.map(
+                (curriculumItem, index) => (
+                  <li
+                    className={`${
+                      curriculumItem?.freePreview
+                        ? "cursor-pointer"
+                        : "cursor-not-allowed"
+                    } flex items-center mb-4`}
+                    onClick={
+                      curriculumItem?.freePreview
+                        ? () => handleSetFreePreview(curriculumItem)
+                        : null
+                    }
+                  >
+                    {curriculumItem?.freePreview ? (
+                      <PlayCircle className="mr-2 h-4 w-4" />
+                    ) : (
+                      <Lock className="mr-2 h-4 w-4" />
+                    )}
+                    <span>{curriculumItem?.title}</span>
+                  </li>
                 )
-              ) : (
-                <p>No curriculum available.</p>
               )}
             </CardContent>
           </Card>
@@ -264,23 +252,33 @@ function StudentViewCourseDetailsPage() {
       >
         <DialogContent className="w-[800px]">
           <DialogHeader>
-            <DialogTitle>Free Preview</DialogTitle>
-            <DialogClose />
+            <DialogTitle>Course Preview</DialogTitle>
           </DialogHeader>
-          <div className="h-[500px]">
+          <div className="aspect-video rounded-lg flex items-center justify-center">
             <VideoPlayer
               url={displayCurrentVideoFreePreview}
-              width="100%"
-              height="100%"
+              width="450px"
+              height="200px"
             />
           </div>
-          <DialogFooter>
-            <Button
-              onClick={() => setShowFreePreviewDialog(false)}
-              type="button"
-            >
-              Close Preview
-            </Button>
+          <div className="flex flex-col gap-2">
+            {studentViewCourseDetails?.curriculum
+              ?.filter((item) => item.freePreview)
+              .map((filteredItem) => (
+                <p
+                  onClick={() => handleSetFreePreview(filteredItem)}
+                  className="cursor-pointer text-[16px] font-medium"
+                >
+                  {filteredItem?.title}
+                </p>
+              ))}
+          </div>
+          <DialogFooter className="sm:justify-start">
+            <DialogClose asChild>
+              <Button type="button" variant="secondary">
+                Close
+              </Button>
+            </DialogClose>
           </DialogFooter>
         </DialogContent>
       </Dialog>
